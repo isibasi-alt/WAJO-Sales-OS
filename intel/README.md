@@ -31,7 +31,7 @@
 ## Mac Studio の準備（1回だけ）
 
 ```bash
-# 1. Claude Code を入れて、石橋さんのアカウントでログイン
+# 1. Claude Code を入れて、大ちゃんのアカウントでログイン
 curl -fsSL https://claude.ai/install.sh | bash
 claude            # 起動してログイン
 
