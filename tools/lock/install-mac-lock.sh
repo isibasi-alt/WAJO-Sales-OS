@@ -38,7 +38,9 @@ echo "== Claude Code =="
 echo "鍵の本体を置く: $GUARD_DST"
 echo "設定に足す: ${CLAUDE_SETTINGS}（フック1つ・拒否ルール3つ。今ある設定は残す）"
 echo "== Codex =="
-if [ -f "$CODEX_CONFIG" ]; then
+if [ "${WAJO_LOCK_CODEX:-0}" != "1" ]; then
+  echo "Codex には触らない（2026-10-28 に Codex が立ち上がらなくなったため止めている）"
+elif [ -f "$CODEX_CONFIG" ]; then
   now="$(grep -E '^[[:space:]]*approval_policy[[:space:]]*=' "$CODEX_CONFIG" | head -1)"
   echo "設定を変える: ${CODEX_CONFIG}（今：${now:-approval_policy の指定なし} → approval_policy = \"untrusted\"）"
 else
@@ -85,6 +87,7 @@ with open(path, "w", encoding="utf-8") as f:
 print("Claude Code の設定に鍵を足しました: " + path)
 PY
 
+if [ "${WAJO_LOCK_CODEX:-0}" = "1" ]; then
 python3 - "$CODEX_CONFIG" <<'PY'
 import os, re, sys
 path = sys.argv[1]
@@ -125,8 +128,10 @@ with open(path, "w", encoding="utf-8") as f:
     f.write("\n")
 print("Codex のフックに鍵をつなぎました（Notion への書き込みと本番デプロイを止める）: " + path)
 PY
+else
+  echo "Codex には鍵をかけていません（2026-10-28、かけたら Codex が立ち上がらなくなったため止めている。WAJO_LOCK_CODEX=1 で有効。かける前に必ず試すこと）"
+fi
 
 echo "----"
 echo "鍵をかけました。控え: $BACKUP"
-echo "Codex は次に開いたとき、新しいフックを信頼するか聞いてきます。信頼を選んでください。"
 echo "開いている Claude Code と Codex は、いったん閉じて開き直すと鍵が効きます。"
