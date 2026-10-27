@@ -36,13 +36,13 @@ fi
 
 echo "== Claude Code =="
 echo "鍵の本体を置く: $GUARD_DST"
-echo "設定に足す: $CLAUDE_SETTINGS（フック1つ・拒否ルール3つ。今ある設定は残す）"
+echo "設定に足す: ${CLAUDE_SETTINGS}（フック1つ・拒否ルール3つ。今ある設定は残す）"
 echo "== Codex =="
 if [ -f "$CODEX_CONFIG" ]; then
   now="$(grep -E '^[[:space:]]*approval_policy[[:space:]]*=' "$CODEX_CONFIG" | head -1)"
-  echo "設定を変える: $CODEX_CONFIG（今：${now:-approval_policy の指定なし} → approval_policy = \"untrusted\"）"
+  echo "設定を変える: ${CODEX_CONFIG}（今：${now:-approval_policy の指定なし} → approval_policy = \"untrusted\"）"
 else
-  echo "設定を作る: $CODEX_CONFIG（approval_policy = \"untrusted\"）"
+  echo "設定を作る: ${CODEX_CONFIG}（approval_policy = \"untrusted\"）"
 fi
 
 if [ "$APPLY" -eq 0 ]; then
@@ -106,6 +106,27 @@ with open(path, "w", encoding="utf-8") as f:
 print("Codex の設定に鍵をかけました: " + path)
 PY
 
+CODEX_HOOKS="$HOME/.codex/hooks.json"
+[ -f "$CODEX_HOOKS" ] && [ ! -f "$BACKUP/codex-hooks.json" ] && cp -p "$CODEX_HOOKS" "$BACKUP/codex-hooks.json"
+python3 - "$CODEX_HOOKS" <<'PY'
+import json, os, sys
+path = sys.argv[1]
+data = {}
+if os.path.exists(path):
+    with open(path, encoding="utf-8") as f:
+        text = f.read().strip()
+    data = json.loads(text) if text else {}
+cmd = 'WAJO_GUARD_MODE=block bash "$HOME/.claude/hooks/wajo-production-guard.sh"'
+hooks = data.setdefault("hooks", {}).setdefault("PreToolUse", [])
+if not any(h.get("command") == cmd for e in hooks for h in e.get("hooks", [])):
+    hooks.append({"hooks": [{"type": "command", "command": cmd, "timeout": 10}]})
+with open(path, "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+print("Codex のフックに鍵をつなぎました（Notion への書き込みと本番デプロイを止める）: " + path)
+PY
+
 echo "----"
 echo "鍵をかけました。控え: $BACKUP"
+echo "Codex は次に開いたとき、新しいフックを信頼するか聞いてきます。信頼を選んでください。"
 echo "開いている Claude Code と Codex は、いったん閉じて開き直すと鍵が効きます。"

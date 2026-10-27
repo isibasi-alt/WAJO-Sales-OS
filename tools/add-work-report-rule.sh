@@ -37,11 +37,18 @@ echo "$HOME/.claude/CLAUDE.md" >> "$LIST"
 echo "$HOME/.codex/AGENTS.md" >> "$LIST"
 
 find_rules() {
+  # 他人のプログラムの置き場所（プラグイン・部品の一時置き場・ダウンロード）と、古いバックアップには書かない。
+  # 書くと壊れる（Go の部品は検査で弾かれる）か、更新で上書きされて消える。
   find "$1" \
     \( -path "$HOME/Library" -o -path "$HOME/.Trash" -o -path "$BACKUP" \
        -o -path "$HOME/.claude/plugins" -o -path "$HOME/.claude/projects" \
-       -o -path "$HOME/.codex/sessions" \
-       -o -name node_modules -o -name .git -o -name .cache \) -prune \
+       -o -path "$HOME/.claude_backup" -o -path "$HOME/.codex/sessions" \
+       -o -path "$HOME/.codex/.tmp" -o -path "$HOME/.codex/plugins" \
+       -o -path "$HOME/.cursor" -o -path "$HOME/.hermes" -o -path "$HOME/.nvm" \
+       -o -path "$HOME/go" -o -path "$HOME/Downloads" -o -path "$HOME/Documents/Codex" \
+       -o -name node_modules -o -name .git -o -name .cache \
+       -o -name 'claudian-main' -o -name '*BACKUP*' -o -name '*Archives*' \
+       -o -name '*アーカイブ*' -o -name '*バックアップ*' -o -name '*旧同期残骸*' \) -prune \
     -o -type f \( -name CLAUDE.md -o -name AGENTS.md \) -print 2>/dev/null
 }
 

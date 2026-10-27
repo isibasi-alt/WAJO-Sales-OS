@@ -25,6 +25,12 @@ log() {
 
 decide() {
   # $1 = ask / deny、$2 = 理由
+  # WAJO_GUARD_MODE=block（Codex 用）のときは、承認画面ではなく止める（終了コード2・理由は標準エラー）。
+  if [ "${WAJO_GUARD_MODE:-}" = "block" ]; then
+    log "block"
+    printf '%s\n' "$2" >&2
+    exit 2
+  fi
   log "$1"
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"%s","permissionDecisionReason":"%s"}}\n' "$1" "$2"
   exit 0
