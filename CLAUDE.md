@@ -14,6 +14,8 @@
 - 調べるように頼まれたときは、調べるだけで終える。見つけた不具合は作業報告に書き、直すかどうかは大ちゃんが決める。
 <!-- /WAJO-WORK-REPORT-RULE -->
 
+- 鍵：`.claude/settings.json` のフック（`tools/lock/production-guard.sh`）が、Notion への書き込みのたびに大ちゃんの承認画面を出し、Worker の本番デプロイを止める。鍵を外さない・別の命令で回り込まない。Mac 全体には `tools/lock/install-mac-lock.sh` でかける。
+
 ## 中心：和上朝刊くん（`intel/`）— 最優先・フルベット
 
 - 流れ：Mac Studio 巡回（2時間おき）→ 業界ニュースDB（ダム）← 朝刊ルーティン（毎朝 4:52 JST）→ DISCOVER AI が選んで取る → ワニポの日報 → STAFF HOME
