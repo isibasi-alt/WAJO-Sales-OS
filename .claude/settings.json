@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(ntn workers deploy)",
+      "Bash(ntn workers deploy *)",
+      "Bash(NOTION_KEYRING=0 ntn workers deploy *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/tools/lock/production-guard.sh\"",
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ]
+  }
+}
